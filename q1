@@ -1,0 +1,26 @@
+import tensorflow as tf
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+
+# Load and freeze pre-trained model
+base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+base_model.trainable = False
+
+# Add custom layers
+x = GlobalAveragePooling2D()(base_model.output)
+output = Dense(7, activation='softmax')(x)  # 7 emotion classes
+model = Model(inputs=base_model.input, outputs=output)
+
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Load and preprocess data
+train_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory('train_data', target_size=(224, 224))
+val_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255).flow_from_directory('val_data', target_size=(224, 224))
+
+# Train the model
+model.fit(train_gen, validation_data=val_gen, epochs=5)
+
+# Save the model
+model.save('emotion_model.h5')
