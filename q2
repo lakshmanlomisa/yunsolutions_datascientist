@@ -1,0 +1,16 @@
+import pandas as pd
+import numpy as np
+from sklearn.cluster import DBSCAN
+
+# Create a sample dataframe
+data = {'x': [0, 0.1, 1, 1.2, 2], 'y': [0, 0.2, 1, 1.1, 2]}
+df = pd.DataFrame(data)
+
+# Apply DBSCAN clustering
+coordinates = df[['x', 'y']].values
+dbscan = DBSCAN(eps=0.5, min_samples=1, metric='euclidean').fit(coordinates)
+
+# Add cluster labels to the dataframe
+df['group'] = dbscan.labels_
+
+print(df)
